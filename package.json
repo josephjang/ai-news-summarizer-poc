@@ -1,7 +1,7 @@
 {
   "name": "ai-news-summarizer-poc",
   "version": "1.0.0",
-  "description": "",
+  "description": "A CLI tool to fetch news articles from URLs, summarize them using AI, and save the results to your Obsidian vault",
   "main": "dist/index.js",
   "bin": {
     "ai-news-summarizer": "dist/cli.js"
@@ -10,11 +10,13 @@
     "build": "tsc",
     "start": "node dist/cli.js",
     "dev": "ts-node src/cli.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "clean": "rm -rf dist/",
+    "prepare": "npm run build"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": ["ai", "news", "summarizer", "obsidian", "cli", "openai", "markdown"],
+  "author": "Jeongho Jang <josephjang@gmail.com>",
+  "license": "MIT",
   "type": "commonjs",
   "dependencies": {
     "@types/node": "^24.0.8",

@@ -87,16 +87,41 @@
 #### Test Results
 1. **Configuration Init**: ✅ Pass - Config file created successfully
 2. **Configuration Validation**: ✅ Pass - After fixing .env and vault path
-3. **Basic Summarization**: ❓ Not tested (requires valid OpenAI API key)
-4. **Output Verification**: ❓ Not tested
-5. **Prompt Templates**: ❓ Not tested
-6. **Custom Output**: ❓ Not tested
+3. **Basic Summarization**: ✅ Pass - Multiple articles successfully processed
+4. **Output Verification**: ✅ Pass - Proper markdown files with frontmatter, tags, key points
+5. **Prompt Templates**: ✅ Pass - Default and technical prompts working differently
+6. **Custom Output**: ✅ Pass - Files saved to specified folders
+
+#### Detailed Test Results
+
+**✅ Successful URLs:**
+- `https://dev.to/devteam/reflect-and-share-your-worlds-largest-hackathon-journey-writing-challenge-now-open-g82` - Full content extraction
+- `https://stackoverflow.blog/` - Extracted "Why is this code five times slower in C# compared to Java?" article
+- `https://github.blog/changelog/` - Extracted changelog content
+- `https://httpbin.org/html` - Herman Melville content extraction
+- `https://www.example.com` - Simple page extraction
+
+**❌ Failed URLs:**
+- `https://www.bbc.com/news/articles/c62jdz61ppvo` - Only title extraction
+- `https://techcrunch.com/2024/12/31/...` - 404 error, only got "404" title
+- `https://www.reuters.com/technology/artificial-intelligence/` - "Could not extract sufficient content"
+- `https://apnews.com/technology` - Landing page, only got "Technology" title
+
+**Site Compatibility Analysis:**
+- ✅ **Dev.to**: Excellent - Full content extraction with metadata
+- ✅ **Stack Overflow Blog**: Good - Article content and author info
+- ✅ **GitHub Blog**: Good - Changelog content extraction
+- ✅ **Simple HTML sites**: Perfect - Complete content extraction
+- ❌ **Major news sites**: Poor - Anti-scraping, JavaScript-heavy content
+- ❌ **Landing pages**: Limited - Only titles extracted
 
 #### Notes
-- Initial config validation failed due to hardcoded paths in config.json
-- Fixed by deleting config.json and regenerating with proper environment variables
-- Test environment is now properly configured with local test-vault
-- Ready for end-to-end testing with valid API key
+- Configuration system working after environment variable fixes
+- OpenAI integration successful with valid API key
+- Content extraction varies significantly by site architecture
+- Some sites use anti-scraping measures or JavaScript rendering
+- Prompt templates generate different summary styles as expected
+- File naming and organization working correctly
 
 #### Overall Result
-⚠️ **Setup Complete** - Configuration system working, ready for functional testing
+⚠️ **Partially Successful** - Core functionality works but limited by site compatibility (~60% success rate with real sites)

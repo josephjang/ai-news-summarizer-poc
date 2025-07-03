@@ -34,7 +34,7 @@ export class AISummarizer {
     
     const userMessage = prompt.userPrompt
       .replace('{title}', article.title)
-      .replace('{content}', article.content)
+      .replace('{content}', article.markdownContent || article.content)
       .replace('{url}', article.url);
 
     const completion = await this.openai.chat.completions.create({
@@ -48,12 +48,17 @@ export class AISummarizer {
           role: 'user',
           content: userMessage
         }
-      ],
-      temperature: 0.7,
-      max_tokens: 1000
+      ]
     });
 
     const response = completion.choices[0]?.message?.content || '';
+    
+    // Debug: Log the main summary response
+    console.log(`\n=== SUMMARY DEBUG ===`);
+    console.log(`Model: ${model}`);
+    console.log(`Summary length: ${response.length}`);
+    console.log(`Summary preview: ${response.substring(0, 200)}...`);
+    console.log(`====================\n`);
     
     let keyPoints: string[] = [];
     let tags: string[] = [];
@@ -86,12 +91,17 @@ export class AISummarizer {
           role: 'user',
           content: `Summary: ${summary}\n\nOriginal Title: ${article.title}`
         }
-      ],
-      temperature: 0.3,
-      max_tokens: 200
+      ]
     });
 
     const response = completion.choices[0]?.message?.content || '[]';
+    
+    // Debug: Log key points extraction
+    console.log(`\n=== KEY POINTS DEBUG ===`);
+    console.log(`Model: ${model}`);
+    console.log(`Response length: ${response.length}`);
+    console.log(`Raw response: ${response}`);
+    console.log(`=========================\n`);
     
     try {
       return JSON.parse(response);
@@ -118,12 +128,17 @@ export class AISummarizer {
           role: 'user',
           content: `Title: ${article.title}\n\nSummary: ${summary}`
         }
-      ],
-      temperature: 0.3,
-      max_tokens: 100
+      ]
     });
 
     const response = completion.choices[0]?.message?.content || '[]';
+    
+    // Debug: Log tags extraction
+    console.log(`\n=== TAGS DEBUG ===`);
+    console.log(`Model: ${model}`);
+    console.log(`Response length: ${response.length}`);
+    console.log(`Raw response: ${response}`);
+    console.log(`===================\n`);
     
     try {
       return JSON.parse(response);

@@ -4,11 +4,84 @@ import TurndownService from 'turndown';
 export interface ArticleContent {
   markdownContent: string;
   url: string;
+  title?: string;
+  publishedDate?: Date;
+  metaData?: Record<string, string>;
 }
 
 export class ContentFetcher {
   private browser: Browser | null = null;
   private turndownService!: TurndownService;
+
+  private parsePublishedDate(metaData: Record<string, string>): Date | undefined {
+    // Common meta tag names for published dates
+    const dateFields = [
+      'article:published_time',
+      'article:published',
+      'published-date',
+      'publication-date',
+      'og:published_time',
+      'twitter:published_time',
+      'date',
+      'pubdate',
+      'publishedAt',
+      'datePublished',
+      'article:modified_time',
+      'article:modified',
+      'modified-date',
+      'lastmod'
+    ];
+
+    for (const field of dateFields) {
+      const dateString = metaData[field];
+      if (dateString) {
+        const parsedDate = this.parseDate(dateString);
+        if (parsedDate) {
+          return parsedDate;
+        }
+      }
+    }
+
+    return undefined;
+  }
+
+  private parseDate(dateString: string): Date | undefined {
+    if (!dateString) return undefined;
+
+    // Clean up the date string
+    const cleaned = dateString.trim();
+    
+    // Try parsing ISO format first
+    const isoDate = new Date(cleaned);
+    if (!isNaN(isoDate.getTime())) {
+      return isoDate;
+    }
+
+    // Try parsing common date formats
+    const dateFormats = [
+      // RFC 2822 format
+      /^\w{3}, \d{1,2} \w{3} \d{4} \d{2}:\d{2}:\d{2}/,
+      // ISO-like formats
+      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/,
+      /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/,
+      /^\d{4}-\d{2}-\d{2}/,
+      // Common formats
+      /^\d{1,2}\/\d{1,2}\/\d{4}/,
+      /^\d{1,2}-\d{1,2}-\d{4}/,
+      /^\w{3} \d{1,2}, \d{4}/
+    ];
+
+    for (const format of dateFormats) {
+      if (format.test(cleaned)) {
+        const parsed = new Date(cleaned);
+        if (!isNaN(parsed.getTime())) {
+          return parsed;
+        }
+      }
+    }
+
+    return undefined;
+  }
 
   async initialize(): Promise<void> {
     this.browser = await puppeteer.launch({
@@ -36,7 +109,25 @@ export class ContentFetcher {
     try {
       await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
       
-      const htmlContent = await page.evaluate(() => {
+      const pageData = await page.evaluate(() => {
+        // Extract meta data
+        const metaData: Record<string, string> = {};
+        const metaTags = document.querySelectorAll('meta');
+        
+        metaTags.forEach(tag => {
+          const name = tag.getAttribute('name') || tag.getAttribute('property') || tag.getAttribute('itemprop');
+          const content = tag.getAttribute('content');
+          if (name && content) {
+            metaData[name] = content;
+          }
+        });
+        
+        // Extract title from meta or title tag
+        const title = document.querySelector('title')?.textContent || 
+                     metaData['og:title'] || 
+                     metaData['twitter:title'] || 
+                     metaData['title'] || '';
+        
         // Try to extract content using common selectors
         const selectors = [
           'article',
@@ -96,20 +187,32 @@ export class ContentFetcher {
           }
         }
         
-        return htmlContent;
+        return {
+          htmlContent,
+          title: title.trim(),
+          metaData
+        };
       });
 
+      // Parse published date from meta data
+      const publishedDate = this.parsePublishedDate(pageData.metaData);
+      
       // Debug: Log what we extracted
       console.log(`\n=== DEBUG INFO ===`);
-      console.log(`HTML length: ${htmlContent.length}`);
-      console.log(`HTML preview: ${htmlContent.substring(0, 200)}...`);
+      console.log(`HTML length: ${pageData.htmlContent.length}`);
+      console.log(`Title: ${pageData.title}`);
+      console.log(`Published date: ${publishedDate ? publishedDate.toISOString() : 'Not found'}`);
+      console.log(`HTML preview: ${pageData.htmlContent.substring(0, 200)}...`);
       console.log(`==================\n`);
       
-      const markdownContent = this.turndownService.turndown(htmlContent);
+      const markdownContent = this.turndownService.turndown(pageData.htmlContent);
       
       return {
         url,
-        markdownContent: this.cleanMarkdownContent(markdownContent)
+        markdownContent: this.cleanMarkdownContent(markdownContent),
+        title: pageData.title,
+        publishedDate,
+        metaData: pageData.metaData
       };
 
     } finally {

@@ -28,9 +28,15 @@ export class ObsidianIntegration {
   private generateFilename(summary: SummaryResult): string {
     const article = summary.originalArticle;
     const now = new Date();
-    const date = now.getFullYear() + '-' + 
-                 String(now.getMonth() + 1).padStart(2, '0') + '-' + 
-                 String(now.getDate()).padStart(2, '0');
+    const currentDate = now.getFullYear() + '-' + 
+                        String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+                        String(now.getDate()).padStart(2, '0');
+    
+    // Use published date if available, otherwise use current date
+    const publishedDate = article.publishedDate || now;
+    const publishedDateStr = publishedDate.getFullYear() + '-' + 
+                             String(publishedDate.getMonth() + 1).padStart(2, '0') + '-' + 
+                             String(publishedDate.getDate()).padStart(2, '0');
     
     // Use profile filename if available, otherwise fallback to config
     const filenameTemplate = summary.profile.filename || this.config.filenameFormat || '{date}-summary';
@@ -41,7 +47,11 @@ export class ObsidianIntegration {
     const cleanDomain = domain.replace(/[^a-zA-Z0-9-]/g, '-');
     
     const filename = filenameTemplate
-      .replace('{date}', date)
+      .replace('{date}', currentDate)
+      .replace('{published_date}', publishedDateStr)
+      .replace('{published_year}', publishedDate.getFullYear().toString())
+      .replace('{published_month}', String(publishedDate.getMonth() + 1).padStart(2, '0'))
+      .replace('{published_day}', String(publishedDate.getDate()).padStart(2, '0'))
       .replace('{domain}', cleanDomain)
       .replace('{timestamp}', Date.now().toString());
     
@@ -51,16 +61,17 @@ export class ObsidianIntegration {
   private generateMarkdown(summary: SummaryResult): string {
     const article = summary.originalArticle;
     const now = new Date();
-    const date = now.getFullYear() + '-' + 
-                 String(now.getMonth() + 1).padStart(2, '0') + '-' + 
-                 String(now.getDate()).padStart(2, '0') + ' ' +
-                 String(now.getHours()).padStart(2, '0') + ':' + 
-                 String(now.getMinutes()).padStart(2, '0') + ':' + 
-                 String(now.getSeconds()).padStart(2, '0');
+    const processingDate = now.getFullYear() + '-' + 
+                           String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+                           String(now.getDate()).padStart(2, '0') + ' ' +
+                           String(now.getHours()).padStart(2, '0') + ':' + 
+                           String(now.getMinutes()).padStart(2, '0') + ':' + 
+                           String(now.getSeconds()).padStart(2, '0');
     
-    // Extract title from markdown content (first h1)
-    const titleMatch = article.markdownContent.match(/^#\s+(.+)$/m);
-    const title = titleMatch ? titleMatch[1].trim() : 'Article Summary';
+    // Use extracted title if available, otherwise extract from markdown or use default
+    const title = article.title || 
+                  (article.markdownContent.match(/^#\s+(.+)$/m)?.[1]?.trim()) || 
+                  'Article Summary';
     
     let markdown = '';
     
@@ -68,7 +79,18 @@ export class ObsidianIntegration {
     markdown += '---\n';
     markdown += `title: "${title.replace(/"/g, '\\"')}"\n`;
     markdown += `url: ${article.url}\n`;
-    markdown += `date: ${date}\n`;
+    markdown += `processing_date: ${processingDate}\n`;
+    
+    // Add published date if available
+    if (article.publishedDate) {
+      const publishedDateStr = article.publishedDate.getFullYear() + '-' + 
+                               String(article.publishedDate.getMonth() + 1).padStart(2, '0') + '-' + 
+                               String(article.publishedDate.getDate()).padStart(2, '0') + ' ' +
+                               String(article.publishedDate.getHours()).padStart(2, '0') + ':' + 
+                               String(article.publishedDate.getMinutes()).padStart(2, '0') + ':' + 
+                               String(article.publishedDate.getSeconds()).padStart(2, '0');
+      markdown += `published_date: ${publishedDateStr}\n`;
+    }
     
     // Add tags from profile if available
     if (summary.profile.tags && summary.profile.tags.length > 0) {

@@ -38,7 +38,7 @@
     "name": "AI News Summary",
     "systemPrompt": "You are an expert at summarizing AI news articles. Create concise, informative summaries that capture the main points and key insights. Focus on facts and avoid speculation.",
     "userPromptFile": "ainews-korean.md",
-    "filename": "AINews {date}",
+    "filename": "AINews {published_date}",
     "tags": ["AINews"]
   }
 }

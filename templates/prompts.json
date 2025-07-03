@@ -2,36 +2,26 @@
   "default": {
     "name": "Default Summary",
     "systemPrompt": "You are an expert at summarizing news articles. Create concise, informative summaries that capture the main points and key insights. Focus on facts and avoid speculation.",
-    "userPrompt": "Please summarize this article:\n\nTitle: {title}\nURL: {url}\n\nContent: {content}",
-    "extractKeyPoints": true,
-    "extractTags": true
+    "userPrompt": "Please summarize this article:\n\nTitle: {title}\nURL: {url}\n\nContent: {content}"
   },
   "technical": {
     "name": "Technical Analysis",
     "systemPrompt": "You are a technical analyst specializing in technology, AI, and software development news. Focus on technical details, implications, and industry impact.",
-    "userPrompt": "Analyze this technical article with focus on:\n- Technical details and innovations\n- Industry implications\n- Potential impact on developers/companies\n\nTitle: {title}\nContent: {content}",
-    "extractKeyPoints": true,
-    "extractTags": true
+    "userPrompt": "Analyze this technical article with focus on:\n- Technical details and innovations\n- Industry implications\n- Potential impact on developers/companies\n\nTitle: {title}\nContent: {content}"
   },
   "business": {
     "name": "Business Impact",
     "systemPrompt": "You are a business analyst. Focus on market implications, financial impact, competitive dynamics, and strategic considerations.",
-    "userPrompt": "Analyze this article from a business perspective:\n- Market implications\n- Financial/strategic impact\n- Competitive dynamics\n- Business opportunities/risks\n\nTitle: {title}\nContent: {content}",
-    "extractKeyPoints": true,
-    "extractTags": true
+    "userPrompt": "Analyze this article from a business perspective:\n- Market implications\n- Financial/strategic impact\n- Competitive dynamics\n- Business opportunities/risks\n\nTitle: {title}\nContent: {content}"
   },
   "brief": {
     "name": "Brief Summary",
     "systemPrompt": "Create very concise summaries in 2-3 sentences. Focus only on the most essential information.",
-    "userPrompt": "Summarize this article in 2-3 sentences maximum:\n\nTitle: {title}\nContent: {content}",
-    "extractKeyPoints": false,
-    "extractTags": true
+    "userPrompt": "Summarize this article in 2-3 sentences maximum:\n\nTitle: {title}\nContent: {content}"
   },
   "detailed": {
     "name": "Detailed Analysis",
     "systemPrompt": "Provide comprehensive analysis including context, implications, and detailed breakdown of all important aspects.",
-    "userPrompt": "Provide a detailed analysis of this article including:\n- Main points and context\n- Implications and consequences\n- Background information\n- Future outlook\n\nTitle: {title}\nContent: {content}",
-    "extractKeyPoints": true,
-    "extractTags": true
+    "userPrompt": "Provide a detailed analysis of this article including:\n- Main points and context\n- Implications and consequences\n- Background information\n- Future outlook\n\nTitle: {title}\nContent: {content}"
   }
 }

@@ -67,12 +67,6 @@ export class ObsidianIntegration {
       markdown += `published: ${article.publishedDate}\n`;
     }
     
-    if (summary.tags.length > 0) {
-      markdown += `tags:\n`;
-      summary.tags.forEach(tag => {
-        markdown += `  - ${tag}\n`;
-      });
-    }
     
     markdown += 'type: article-summary\n';
     markdown += '---\n\n';
@@ -91,25 +85,11 @@ export class ObsidianIntegration {
     }
     markdown += `- **Summarized:** ${new Date().toLocaleDateString()}\n\n`;
     
-    // Tags
-    if (summary.tags.length > 0) {
-      markdown += '**Tags:** ';
-      markdown += summary.tags.map(tag => `#${tag.replace(/\s+/g, '-')}`).join(' ');
-      markdown += '\n\n';
-    }
     
     // Summary
     markdown += '## Summary\n\n';
     markdown += summary.summary + '\n\n';
     
-    // Key Points
-    if (summary.keyPoints.length > 0) {
-      markdown += '## Key Points\n\n';
-      summary.keyPoints.forEach(point => {
-        markdown += `- ${point}\n`;
-      });
-      markdown += '\n';
-    }
     
     // Link back to original
     markdown += '## Links\n\n';

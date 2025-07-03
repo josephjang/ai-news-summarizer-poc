@@ -78,7 +78,6 @@ program
       const savedPath = await obsidian.saveArticle(summary);
       
       console.log(`✅ Summary saved to: ${savedPath}`);
-      console.log(`📊 Generated ${summary.keyPoints.length} key points and ${summary.tags.length} tags`);
       
       // Cleanup
       await fetcher.close();

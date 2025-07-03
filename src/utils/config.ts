@@ -83,9 +83,7 @@ export class ConfigManager {
         default: {
           name: 'Default Summary',
           systemPrompt: 'You are an expert at summarizing news articles. Create concise, informative summaries.',
-          userPrompt: 'Please summarize this article:\n\nTitle: {title}\nContent: {content}',
-          extractKeyPoints: true,
-          extractTags: true
+          userPrompt: 'Please summarize this article:\n\nTitle: {title}\nContent: {content}'
         }
       };
     }

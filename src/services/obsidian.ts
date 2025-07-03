@@ -68,21 +68,8 @@ export class ObsidianIntegration {
     markdown += `date: ${date}\n`;
     markdown += '---\n\n';
     
-    // Title based on extracted title or URL
-    const urlParts = new URL(article.url);
-    const domain = urlParts.hostname.replace(/^www\./, '');
-    const displayTitle = title !== 'Article Summary' ? title : `Article Summary from ${domain}`;
-    markdown += `# ${displayTitle}\n\n`;
-    
-    
-    // Summary
-    markdown += '## Summary\n\n';
-    markdown += summary.summary + '\n\n';
-    
-    
-    // Link back to original
-    markdown += '## Links\n\n';
-    markdown += `- [Original Article](${article.url})\n`;
+    // Only the AI-generated summary content
+    markdown += summary.summary;
     
     return markdown;
   }

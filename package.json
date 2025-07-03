@@ -14,18 +14,28 @@
     "clean": "rm -rf dist/",
     "prepare": "npm run build"
   },
-  "keywords": ["ai", "news", "summarizer", "obsidian", "cli", "openai", "markdown"],
+  "keywords": [
+    "ai",
+    "news",
+    "summarizer",
+    "obsidian",
+    "cli",
+    "openai",
+    "markdown"
+  ],
   "author": "Jeongho Jang <josephjang@gmail.com>",
   "license": "MIT",
   "type": "commonjs",
   "dependencies": {
     "@types/node": "^24.0.8",
     "@types/puppeteer": "^5.4.7",
+    "@types/turndown": "^5.0.5",
     "commander": "^14.0.0",
     "dotenv": "^17.0.0",
     "openai": "^5.8.2",
     "puppeteer": "^24.11.2",
     "ts-node": "^10.9.2",
+    "turndown": "^7.2.0",
     "typescript": "^5.8.3"
   }
 }

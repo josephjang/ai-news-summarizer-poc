@@ -23,6 +23,7 @@ program
   .option('-p, --prompt <name>', 'prompt template to use', 'default')
   .option('-o, --output <path>', 'output directory (relative to vault)')
   .option('-c, --config <path>', 'path to config file')
+  .option('-m, --model <model>', 'AI model to use (overrides config)')
   .action(async (url: string, options: any) => {
     try {
       console.log(`📰 Fetching article from: ${url}`);
@@ -40,7 +41,7 @@ program
       }
       
       const fetcher = new ContentFetcher();
-      const summarizer = new AISummarizer(config.openai.apiKey);
+      const summarizer = new AISummarizer(config.ai.apiKey, config.ai.baseUrl);
       
       // Override output folder if specified
       if (options.output) {
@@ -68,8 +69,9 @@ program
       }
       
       // Summarize
-      console.log(`🤖 Generating summary using '${promptTemplate.name}' prompt...`);
-      const summary = await summarizer.summarize(article, promptTemplate);
+      const modelToUse = options.model || config.ai.model;
+      console.log(`🤖 Generating summary using '${promptTemplate.name}' prompt with ${modelToUse}...`);
+      const summary = await summarizer.summarize(article, promptTemplate, modelToUse);
       
       // Save to Obsidian
       console.log('💾 Saving to Obsidian vault...');
@@ -122,7 +124,7 @@ program
         console.log('📄 Current configuration:');
         console.log(JSON.stringify({
           ...config,
-          openai: { apiKey: config.openai.apiKey ? '***set***' : '***not set***' }
+          ai: { ...config.ai, apiKey: config.ai.apiKey ? '***set***' : '***not set***' }
         }, null, 2));
         return;
       }

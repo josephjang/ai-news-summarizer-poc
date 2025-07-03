@@ -19,13 +19,17 @@ export interface SummaryPrompt {
 export class AISummarizer {
   private openai: OpenAI;
 
-  constructor(apiKey: string) {
-    this.openai = new OpenAI({ apiKey });
+  constructor(apiKey: string, baseUrl?: string) {
+    this.openai = new OpenAI({ 
+      apiKey,
+      baseURL: baseUrl || 'https://api.openai.com/v1'
+    });
   }
 
   async summarize(
     article: ArticleContent, 
-    prompt: SummaryPrompt
+    prompt: SummaryPrompt,
+    model: string = 'gpt-4'
   ): Promise<SummaryResult> {
     
     const userMessage = prompt.userPrompt
@@ -34,7 +38,7 @@ export class AISummarizer {
       .replace('{url}', article.url);
 
     const completion = await this.openai.chat.completions.create({
-      model: 'gpt-4',
+      model: model,
       messages: [
         {
           role: 'system',
@@ -55,11 +59,11 @@ export class AISummarizer {
     let tags: string[] = [];
     
     if (prompt.extractKeyPoints) {
-      keyPoints = await this.extractKeyPoints(article, response);
+      keyPoints = await this.extractKeyPoints(article, response, model);
     }
     
     if (prompt.extractTags) {
-      tags = await this.extractTags(article, response);
+      tags = await this.extractTags(article, response, model);
     }
 
     return {
@@ -70,9 +74,9 @@ export class AISummarizer {
     };
   }
 
-  private async extractKeyPoints(article: ArticleContent, summary: string): Promise<string[]> {
+  private async extractKeyPoints(article: ArticleContent, summary: string, model: string): Promise<string[]> {
     const completion = await this.openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
+      model: model,
       messages: [
         {
           role: 'system',
@@ -102,9 +106,9 @@ export class AISummarizer {
     }
   }
 
-  private async extractTags(article: ArticleContent, summary: string): Promise<string[]> {
+  private async extractTags(article: ArticleContent, summary: string, model: string): Promise<string[]> {
     const completion = await this.openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
+      model: model,
       messages: [
         {
           role: 'system',

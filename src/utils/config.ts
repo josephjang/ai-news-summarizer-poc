@@ -4,8 +4,11 @@ import { ObsidianConfig } from '../services/obsidian';
 import { SummaryPrompt } from '../services/summarizer';
 
 export interface AppConfig {
-  openai: {
+  ai: {
+    provider: 'openai' | 'openrouter';
     apiKey: string;
+    model: string;
+    baseUrl?: string;
   };
   obsidian: ObsidianConfig;
   prompts: Record<string, SummaryPrompt>;
@@ -48,8 +51,11 @@ export class ConfigManager {
 
   private async createDefaultConfig(): Promise<AppConfig> {
     const defaultConfig: AppConfig = {
-      openai: {
-        apiKey: process.env.OPENAI_API_KEY || ''
+      ai: {
+        provider: 'openrouter',
+        apiKey: process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY || '',
+        model: 'google/gemini-2.5-pro',
+        baseUrl: 'https://openrouter.ai/api/v1'
       },
       obsidian: {
         vaultPath: process.env.OBSIDIAN_VAULT_PATH || '',
@@ -96,9 +102,9 @@ export class ConfigManager {
     const config = await this.loadConfig();
     const errors: string[] = [];
 
-    // Check OpenAI API key
-    if (!config.openai.apiKey) {
-      errors.push('OpenAI API key is not configured. Set OPENAI_API_KEY environment variable or update config.json');
+    // Check AI API key
+    if (!config.ai.apiKey) {
+      errors.push('AI API key is not configured. Set OPENAI_API_KEY or OPENROUTER_API_KEY environment variable or update config.json');
     }
 
     // Check Obsidian vault path

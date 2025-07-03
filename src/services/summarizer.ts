@@ -4,12 +4,15 @@ import { ArticleContent } from './fetcher';
 export interface SummaryResult {
   summary: string;
   originalArticle: ArticleContent;
+  profile: SummaryProfile;
 }
 
-export interface SummaryPrompt {
+export interface SummaryProfile {
   name: string;
   systemPrompt: string;
   userPrompt: string;
+  filename?: string;
+  tags?: string[];
 }
 
 export class AISummarizer {
@@ -24,11 +27,11 @@ export class AISummarizer {
 
   async summarize(
     article: ArticleContent, 
-    prompt: SummaryPrompt,
+    profile: SummaryProfile,
     model: string = 'gpt-4'
   ): Promise<SummaryResult> {
     
-    const userMessage = prompt.userPrompt
+    const userMessage = profile.userPrompt
       .replace('{content}', article.markdownContent)
       .replace('{url}', article.url);
 
@@ -37,7 +40,7 @@ export class AISummarizer {
       messages: [
         {
           role: 'system',
-          content: prompt.systemPrompt
+          content: profile.systemPrompt
         },
         {
           role: 'user',
@@ -57,7 +60,8 @@ export class AISummarizer {
     
     return {
       summary: response,
-      originalArticle: article
+      originalArticle: article,
+      profile
     };
   }
 

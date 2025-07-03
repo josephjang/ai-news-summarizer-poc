@@ -1,7 +1,7 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { ObsidianConfig } from '../services/obsidian';
-import { SummaryPrompt } from '../services/summarizer';
+import { SummaryProfile } from '../services/summarizer';
 
 export interface AppConfig {
   ai: {
@@ -11,7 +11,7 @@ export interface AppConfig {
     baseUrl?: string;
   };
   obsidian: ObsidianConfig;
-  prompts: Record<string, SummaryPrompt>;
+  prompts: Record<string, SummaryProfile>;
   defaultPrompt: string;
 }
 
@@ -36,9 +36,9 @@ export class ConfigManager {
       this.config = await this.createDefaultConfig();
     }
 
-    // Load prompts from templates
+    // Load profiles from templates
     if (!this.config!.prompts || Object.keys(this.config!.prompts).length === 0) {
-      this.config!.prompts = await this.loadPrompts();
+      this.config!.prompts = await this.loadProfiles();
     }
 
     return this.config!;
@@ -72,18 +72,20 @@ export class ConfigManager {
     return defaultConfig;
   }
 
-  private async loadPrompts(): Promise<Record<string, SummaryPrompt>> {
+  private async loadProfiles(): Promise<Record<string, SummaryProfile>> {
     try {
-      const promptsPath = path.join(__dirname, '../../templates/prompts.json');
-      const promptsData = await fs.readFile(promptsPath, 'utf8');
-      return JSON.parse(promptsData);
+      const profilesPath = path.join(__dirname, '../../templates/profiles.json');
+      const profilesData = await fs.readFile(profilesPath, 'utf8');
+      return JSON.parse(profilesData);
     } catch (error) {
-      console.warn('Could not load prompts from templates, using defaults');
+      console.warn('Could not load profiles from templates, using defaults');
       return {
         default: {
           name: 'Default Summary',
           systemPrompt: 'You are an expert at summarizing news articles. Create concise, informative summaries.',
-          userPrompt: 'Please summarize this article:\n\nContent: {content}'
+          userPrompt: 'Please summarize this article:\n\nContent: {content}',
+          filename: 'Summary {date}',
+          tags: ['summary', 'news']
         }
       };
     }

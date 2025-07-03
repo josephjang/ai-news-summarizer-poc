@@ -1,6 +1,6 @@
 // Main library exports for programmatic usage
 export { ContentFetcher, ArticleContent } from './services/fetcher';
-export { AISummarizer, SummaryResult, SummaryPrompt } from './services/summarizer';
+export { AISummarizer, SummaryResult, SummaryProfile } from './services/summarizer';
 export { ObsidianIntegration, ObsidianConfig } from './services/obsidian';
 export { ConfigManager, AppConfig } from './utils/config';
 

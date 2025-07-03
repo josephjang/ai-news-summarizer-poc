@@ -10,7 +10,8 @@ export interface SummaryResult {
 export interface SummaryProfile {
   name: string;
   systemPrompt: string;
-  userPrompt: string;
+  userPrompt?: string;
+  userPromptFile?: string;
   filename?: string;
   tags?: string[];
 }
@@ -30,6 +31,10 @@ export class AISummarizer {
     profile: SummaryProfile,
     model: string = 'gpt-4'
   ): Promise<SummaryResult> {
+    
+    if (!profile.userPrompt) {
+      throw new Error(`Profile ${profile.name} has no userPrompt defined`);
+    }
     
     const userMessage = profile.userPrompt
       .replace('{content}', article.markdownContent)

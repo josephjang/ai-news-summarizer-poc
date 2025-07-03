@@ -76,7 +76,23 @@ export class ConfigManager {
     try {
       const profilesPath = path.join(__dirname, '../../templates/profiles.json');
       const profilesData = await fs.readFile(profilesPath, 'utf8');
-      return JSON.parse(profilesData);
+      const profiles = JSON.parse(profilesData);
+      
+      // Process profiles to load external userPrompt files
+      for (const [key, profile] of Object.entries(profiles)) {
+        const typedProfile = profile as SummaryProfile;
+        if (typedProfile.userPromptFile && !typedProfile.userPrompt) {
+          try {
+            const promptPath = path.join(__dirname, '../../templates/prompts', typedProfile.userPromptFile);
+            const promptContent = await fs.readFile(promptPath, 'utf8');
+            typedProfile.userPrompt = promptContent;
+          } catch (error) {
+            console.warn(`Could not load userPrompt file ${typedProfile.userPromptFile} for profile ${key}`);
+          }
+        }
+      }
+      
+      return profiles;
     } catch (error) {
       console.warn('Could not load profiles from templates, using defaults');
       return {

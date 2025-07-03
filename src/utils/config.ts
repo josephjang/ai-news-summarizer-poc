@@ -61,7 +61,7 @@ export class ConfigManager {
         vaultPath: process.env.OBSIDIAN_VAULT_PATH || '',
         outputFolder: 'AI News Summaries',
         templateName: 'default',
-        filenameFormat: '{date}-{title}'
+        filenameFormat: '{date}-{domain}'
       },
       prompts: {},
       defaultPrompt: 'default'
@@ -83,7 +83,7 @@ export class ConfigManager {
         default: {
           name: 'Default Summary',
           systemPrompt: 'You are an expert at summarizing news articles. Create concise, informative summaries.',
-          userPrompt: 'Please summarize this article:\n\nTitle: {title}\nContent: {content}'
+          userPrompt: 'Please summarize this article:\n\nContent: {content}'
         }
       };
     }

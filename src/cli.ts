@@ -54,11 +54,11 @@ program
       console.log('🔍 Extracting article content...');
       const article = await fetcher.fetchArticle(url);
       
-      if (!article.content || article.content.length < 100) {
+      if (!article.markdownContent || article.markdownContent.length < 100) {
         throw new Error('Could not extract sufficient content from the article');
       }
       
-      console.log(`✅ Extracted article: "${article.title}"`);
+      console.log(`✅ Extracted article content from: ${article.url}`);
       
       // Get prompt template
       const promptTemplate = config.prompts[options.prompt];

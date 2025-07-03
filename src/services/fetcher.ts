@@ -2,12 +2,8 @@ import puppeteer, { Browser } from 'puppeteer';
 import TurndownService from 'turndown';
 
 export interface ArticleContent {
-  title: string;
-  content: string;
   markdownContent: string;
   url: string;
-  publishedDate?: string;
-  author?: string;
 }
 
 export class ContentFetcher {
@@ -40,7 +36,7 @@ export class ContentFetcher {
     try {
       await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
       
-      const articleData = await page.evaluate(() => {
+      const htmlContent = await page.evaluate(() => {
         // Try to extract content using common selectors
         const selectors = [
           'article',
@@ -61,19 +57,9 @@ export class ContentFetcher {
           '[role="main"]'
         ];
 
-        let content = '';
         let htmlContent = '';
-        let title = '';
         
-        // Extract title
-        const titleElement = document.querySelector('h1') || 
-                           document.querySelector('title') ||
-                           document.querySelector('.headline');
-        if (titleElement) {
-          title = titleElement.textContent?.trim() || '';
-        }
-
-        // Extract content (both HTML and text)
+        // Extract content HTML
         for (const selector of selectors) {
           const element = document.querySelector(selector);
           if (element) {
@@ -89,18 +75,14 @@ export class ContentFetcher {
             );
             unwantedElements.forEach(el => el.remove());
             
-            content = clonedElement.textContent?.trim() || '';
             htmlContent = clonedElement.innerHTML || '';
             
-            console.log(`Selector: ${selector}, Content length: ${content.length}`);
-            
-            if (content.length > 100) break; // Found substantial content
+            if (htmlContent.length > 500) break; // Found substantial content
           }
         }
 
         // Fallback to body if no content found
-        if (!content || content.length < 100) {
-          console.log('Using body fallback');
+        if (!htmlContent || htmlContent.length < 500) {
           const body = document.body.cloneNode(true) as Element;
           if (body) {
             const unwantedElements = body.querySelectorAll(
@@ -110,75 +92,23 @@ export class ContentFetcher {
               '.share-button, .social-media, .breadcrumb, .navigation, .menu'
             );
             unwantedElements.forEach(el => el.remove());
-            content = body.textContent?.trim() || '';
             htmlContent = body.innerHTML || '';
           }
         }
-
-        // Try to extract publish date
-        let publishedDate = '';
-        const dateSelectors = [
-          'time[datetime]',
-          '.published',
-          '.date',
-          '[itemprop="datePublished"]'
-        ];
         
-        for (const selector of dateSelectors) {
-          const dateElement = document.querySelector(selector);
-          if (dateElement) {
-            publishedDate = dateElement.getAttribute('datetime') || 
-                          dateElement.textContent?.trim() || '';
-            if (publishedDate) break;
-          }
-        }
-
-        // Try to extract author
-        let author = '';
-        const authorSelectors = [
-          '[itemprop="author"]',
-          '.author',
-          '.byline',
-          '[rel="author"]'
-        ];
-        
-        for (const selector of authorSelectors) {
-          const authorElement = document.querySelector(selector);
-          if (authorElement) {
-            author = authorElement.textContent?.trim() || '';
-            if (author) break;
-          }
-        }
-
-        console.log(`Final content length: ${content.length}`);
-        console.log(`Final HTML length: ${htmlContent.length}`);
-        console.log(`Title: ${title || document.title || ''}`);
-        
-        return {
-          title: title || document.title || '',
-          content: content || '',
-          htmlContent: htmlContent || '',
-          publishedDate,
-          author
-        };
+        return htmlContent;
       });
 
       // Debug: Log what we extracted
       console.log(`\n=== DEBUG INFO ===`);
-      console.log(`Title: ${articleData.title}`);
-      console.log(`Content length: ${articleData.content.length}`);
-      console.log(`HTML length: ${articleData.htmlContent.length}`);
-      console.log(`Author: ${articleData.author}`);
-      console.log(`Published: ${articleData.publishedDate}`);
-      console.log(`Content preview: ${articleData.content.substring(0, 200)}...`);
+      console.log(`HTML length: ${htmlContent.length}`);
+      console.log(`HTML preview: ${htmlContent.substring(0, 200)}...`);
       console.log(`==================\n`);
       
-      const markdownContent = this.turndownService.turndown(articleData.htmlContent);
+      const markdownContent = this.turndownService.turndown(htmlContent);
       
       return {
-        ...articleData,
         url,
-        content: this.cleanContent(articleData.content),
         markdownContent: this.cleanMarkdownContent(markdownContent)
       };
 
@@ -187,13 +117,6 @@ export class ContentFetcher {
     }
   }
 
-  private cleanContent(content: string): string {
-    // Remove extra whitespace and clean up the content
-    return content
-      .replace(/\s+/g, ' ')
-      .replace(/\n\s*\n/g, '\n\n')
-      .trim();
-  }
 
   private cleanMarkdownContent(markdown: string): string {
     // Clean up markdown formatting

@@ -29,19 +29,17 @@ export class ObsidianIntegration {
     const article = summary.originalArticle;
     const date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
     
-    // Clean title for filename
-    const cleanTitle = article.title
-      .replace(/[^a-zA-Z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .toLowerCase()
-      .substring(0, 50);
+    // Extract domain name for filename
+    const urlParts = new URL(article.url);
+    const domain = urlParts.hostname.replace(/^www\./, '');
+    const cleanDomain = domain.replace(/[^a-zA-Z0-9-]/g, '-');
     
     // Support different filename formats
-    const format = this.config.filenameFormat || '{date}-{title}';
+    const format = this.config.filenameFormat || '{date}-{domain}';
     
     const filename = format
       .replace('{date}', date)
-      .replace('{title}', cleanTitle)
+      .replace('{domain}', cleanDomain)
       .replace('{timestamp}', Date.now().toString());
     
     return `${filename}.md`;
@@ -49,41 +47,32 @@ export class ObsidianIntegration {
 
   private generateMarkdown(summary: SummaryResult): string {
     const article = summary.originalArticle;
-    const date = new Date().toISOString();
+    const now = new Date();
+    const date = now.getFullYear() + '-' + 
+                 String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+                 String(now.getDate()).padStart(2, '0') + ' ' +
+                 String(now.getHours()).padStart(2, '0') + ':' + 
+                 String(now.getMinutes()).padStart(2, '0') + ':' + 
+                 String(now.getSeconds()).padStart(2, '0');
+    
+    // Extract title from markdown content (first h1)
+    const titleMatch = article.markdownContent.match(/^#\s+(.+)$/m);
+    const title = titleMatch ? titleMatch[1].trim() : 'Article Summary';
     
     let markdown = '';
     
     // Frontmatter
     markdown += '---\n';
-    markdown += `title: "${article.title.replace(/"/g, '\\"')}"\n`;
+    markdown += `title: "${title.replace(/"/g, '\\"')}"\n`;
     markdown += `url: ${article.url}\n`;
     markdown += `date: ${date}\n`;
-    
-    if (article.author) {
-      markdown += `author: ${article.author}\n`;
-    }
-    
-    if (article.publishedDate) {
-      markdown += `published: ${article.publishedDate}\n`;
-    }
-    
-    
-    markdown += 'type: article-summary\n';
     markdown += '---\n\n';
     
-    // Title
-    markdown += `# ${article.title}\n\n`;
-    
-    // Metadata
-    markdown += '## Article Info\n\n';
-    markdown += `- **URL:** ${article.url}\n`;
-    if (article.author) {
-      markdown += `- **Author:** ${article.author}\n`;
-    }
-    if (article.publishedDate) {
-      markdown += `- **Published:** ${article.publishedDate}\n`;
-    }
-    markdown += `- **Summarized:** ${new Date().toLocaleDateString()}\n\n`;
+    // Title based on extracted title or URL
+    const urlParts = new URL(article.url);
+    const domain = urlParts.hostname.replace(/^www\./, '');
+    const displayTitle = title !== 'Article Summary' ? title : `Article Summary from ${domain}`;
+    markdown += `# ${displayTitle}\n\n`;
     
     
     // Summary

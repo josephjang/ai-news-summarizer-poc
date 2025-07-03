@@ -29,8 +29,7 @@ export class AISummarizer {
   ): Promise<SummaryResult> {
     
     const userMessage = prompt.userPrompt
-      .replace('{title}', article.title)
-      .replace('{content}', article.markdownContent || article.content)
+      .replace('{content}', article.markdownContent)
       .replace('{url}', article.url);
 
     const completion = await this.openai.chat.completions.create({

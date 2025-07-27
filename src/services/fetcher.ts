@@ -1,5 +1,7 @@
 import puppeteer, { Browser } from 'puppeteer';
 import TurndownService from 'turndown';
+import { Readability } from '@mozilla/readability';
+import { JSDOM } from 'jsdom';
 
 export interface ArticleContent {
   markdownContent: string;
@@ -109,6 +111,7 @@ export class ContentFetcher {
     try {
       await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
       
+      // Get full HTML and meta data
       const pageData = await page.evaluate(() => {
         // Extract meta data
         const metaData: Record<string, string> = {};
@@ -122,95 +125,42 @@ export class ContentFetcher {
           }
         });
         
-        // Extract title from meta or title tag
-        const title = document.querySelector('title')?.textContent || 
-                     metaData['og:title'] || 
-                     metaData['twitter:title'] || 
-                     metaData['title'] || '';
-        
-        // Try to extract content using common selectors
-        const selectors = [
-          'article',
-          '.article-content',
-          '.post-content',
-          '.entry-content',
-          '.content',
-          '.news-content',
-          '.article-body',
-          '.article-text',
-          '.story-content',
-          '.body-content',
-          '#articleBodyContents',
-          '.article_body',
-          '.content-body',
-          '.post-body',
-          'main',
-          '[role="main"]'
-        ];
-
-        let htmlContent = '';
-        
-        // Extract content HTML
-        for (const selector of selectors) {
-          const element = document.querySelector(selector);
-          if (element) {
-            // Clone element to avoid modifying original
-            const clonedElement = element.cloneNode(true) as Element;
-            
-            // Remove script and style elements and common unwanted elements
-            const unwantedElements = clonedElement.querySelectorAll(
-              'script, style, nav, header, footer, .advertisement, .ads, .social-share, ' +
-              '.ad, .banner, .sidebar, .related-articles, .comment, .comments, ' +
-              '.subscription, .newsletter, .popup, .modal, .overlay, .promo, ' +
-              '.share-button, .social-media, .breadcrumb, .navigation, .menu'
-            );
-            unwantedElements.forEach(el => el.remove());
-            
-            htmlContent = clonedElement.innerHTML || '';
-            
-            if (htmlContent.length > 500) break; // Found substantial content
-          }
-        }
-
-        // Fallback to body if no content found
-        if (!htmlContent || htmlContent.length < 500) {
-          const body = document.body.cloneNode(true) as Element;
-          if (body) {
-            const unwantedElements = body.querySelectorAll(
-              'script, style, nav, header, footer, .advertisement, .ads, .social-share, ' +
-              '.ad, .banner, .sidebar, .related-articles, .comment, .comments, ' +
-              '.subscription, .newsletter, .popup, .modal, .overlay, .promo, ' +
-              '.share-button, .social-media, .breadcrumb, .navigation, .menu'
-            );
-            unwantedElements.forEach(el => el.remove());
-            htmlContent = body.innerHTML || '';
-          }
-        }
+        // Get full HTML for Readability processing
+        const fullHTML = document.documentElement.outerHTML;
         
         return {
-          htmlContent,
-          title: title.trim(),
-          metaData
+          fullHTML,
+          metaData,
+          url: window.location.href
         };
       });
+
+      // Use Readability to extract main content
+      const dom = new JSDOM(pageData.fullHTML, { url: pageData.url });
+      const reader = new Readability(dom.window.document);
+      const article = reader.parse();
+
+      if (!article) {
+        throw new Error('Failed to extract article content using Readability');
+      }
 
       // Parse published date from meta data
       const publishedDate = this.parsePublishedDate(pageData.metaData);
       
       // Debug: Log what we extracted
       console.log(`\n=== DEBUG INFO ===`);
-      console.log(`HTML length: ${pageData.htmlContent.length}`);
-      console.log(`Title: ${pageData.title}`);
+      console.log(`Content length: ${article.content?.length || 0}`);
+      console.log(`Title: ${article.title}`);
       console.log(`Published date: ${publishedDate ? publishedDate.toISOString() : 'Not found'}`);
-      console.log(`HTML preview: ${pageData.htmlContent.substring(0, 200)}...`);
+      console.log(`Content preview: ${article.textContent?.substring(0, 200)}...`);
       console.log(`==================\n`);
       
-      const markdownContent = this.turndownService.turndown(pageData.htmlContent);
+      const markdownContent = this.turndownService.turndown(article.content || '');
       
       return {
         url,
         markdownContent: this.cleanMarkdownContent(markdownContent),
-        title: pageData.title,
+        title: article.title || 'Untitled',
         publishedDate,
         metaData: pageData.metaData
       };

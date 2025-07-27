@@ -1,38 +1,10 @@
 {
   "default": {
     "name": "Default Summary",
-    "systemPrompt": "You are an expert at summarizing news articles. Create concise, informative summaries that capture the main points and key insights. Focus on facts and avoid speculation.",
-    "userPrompt": "Please summarize this article:\n\nURL: {url}\n\nContent: {content}",
-    "filename": "Summary {date}",
-    "tags": ["summary", "news"]
-  },
-  "technical": {
-    "name": "Technical Analysis",
-    "systemPrompt": "You are a technical analyst specializing in technology, AI, and software development news. Focus on technical details, implications, and industry impact.",
-    "userPrompt": "Analyze this technical article with focus on:\n- Technical details and innovations\n- Industry implications\n- Potential impact on developers/companies\n\nContent: {content}",
-    "filename": "TechAnalysis {date}",
-    "tags": ["technical", "analysis", "technology"]
-  },
-  "business": {
-    "name": "Business Impact",
-    "systemPrompt": "You are a business analyst. Focus on market implications, financial impact, competitive dynamics, and strategic considerations.",
-    "userPrompt": "Analyze this article from a business perspective:\n- Market implications\n- Financial/strategic impact\n- Competitive dynamics\n- Business opportunities/risks\n\nContent: {content}",
-    "filename": "BusinessAnalysis {date}",
-    "tags": ["business", "market", "analysis"]
-  },
-  "brief": {
-    "name": "Brief Summary",
-    "systemPrompt": "Create very concise summaries in 2-3 sentences. Focus only on the most essential information.",
-    "userPrompt": "Summarize this article in 2-3 sentences maximum:\n\nContent: {content}",
-    "filename": "Brief {date}",
-    "tags": ["brief", "summary"]
-  },
-  "detailed": {
-    "name": "Detailed Analysis",
-    "systemPrompt": "Provide comprehensive analysis including context, implications, and detailed breakdown of all important aspects.",
-    "userPrompt": "Provide a detailed analysis of this article including:\n- Main points and context\n- Implications and consequences\n- Background information\n- Future outlook\n\nContent: {content}",
-    "filename": "DetailedAnalysis {date}",
-    "tags": ["detailed", "analysis", "comprehensive"]
+    "systemPrompt": "You are a helpful assistant that creates clear, actionable summaries. Extract the most important information that the reader needs to know. Include key takeaways, important numbers or dates, and any action items or next steps mentioned.",
+    "userPrompt": "Summarize this content in a practical way that highlights what's most important for someone to understand and act on:\n\nURL: {url}\n\nContent: {content}",
+    "filename": "{date} {title} Summary",
+    "tags": ["summary"]
   },
   "ainews": {
     "name": "AI News Summary",

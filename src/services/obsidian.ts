@@ -61,43 +61,64 @@ export class ObsidianIntegration {
   private generateMarkdown(summary: SummaryResult): string {
     const article = summary.originalArticle;
     const now = new Date();
-    const processingDate = now.getFullYear() + '-' + 
+    const createdDateTime = now.getFullYear() + '-' + 
                            String(now.getMonth() + 1).padStart(2, '0') + '-' + 
                            String(now.getDate()).padStart(2, '0') + ' ' +
                            String(now.getHours()).padStart(2, '0') + ':' + 
-                           String(now.getMinutes()).padStart(2, '0') + ':' + 
-                           String(now.getSeconds()).padStart(2, '0');
+                           String(now.getMinutes()).padStart(2, '0');
     
-    // Use extracted title if available, otherwise extract from markdown or use default
-    const title = article.title || 
-                  (article.markdownContent.match(/^#\s+(.+)$/m)?.[1]?.trim()) || 
-                  'Article Summary';
+    // Generate title based on profile filename pattern
+    const filenameTemplate = summary.profile.filename || 'Article Summary {date}';
+    let title = filenameTemplate;
     
-    let markdown = '';
+    // Replace placeholders in title
+    const currentDateStr = now.getFullYear() + '-' + 
+                          String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+                          String(now.getDate()).padStart(2, '0');
     
-    // Frontmatter
-    markdown += '---\n';
-    markdown += `title: "${title.replace(/"/g, '\\"')}"\n`;
-    markdown += `url: ${article.url}\n`;
-    markdown += `processing_date: ${processingDate}\n`;
-    
-    // Add published date if available
     if (article.publishedDate) {
       const publishedDateStr = article.publishedDate.getFullYear() + '-' + 
                                String(article.publishedDate.getMonth() + 1).padStart(2, '0') + '-' + 
-                               String(article.publishedDate.getDate()).padStart(2, '0') + ' ' +
-                               String(article.publishedDate.getHours()).padStart(2, '0') + ':' + 
-                               String(article.publishedDate.getMinutes()).padStart(2, '0') + ':' + 
-                               String(article.publishedDate.getSeconds()).padStart(2, '0');
-      markdown += `published_date: ${publishedDateStr}\n`;
+                               String(article.publishedDate.getDate()).padStart(2, '0');
+      title = title.replace('{published_date}', publishedDateStr);
     }
     
-    // Add tags from profile if available
+    // Extract domain for title
+    const urlParts = new URL(article.url);
+    const domain = urlParts.hostname.replace(/^www\./, '');
+    const cleanDomain = domain.replace(/[^a-zA-Z0-9-]/g, '-');
+    
+    title = title.replace('{date}', currentDateStr);
+    title = title.replace('{domain}', cleanDomain);
+    title = title.replace('{timestamp}', Date.now().toString());
+    
+    let markdown = '';
+    
+    // Frontmatter - new format
+    markdown += '---\n';
+    markdown += `title: ${title}\n`;
+    markdown += `type: summary\n`;
+    
+    // Add date (published date if available, otherwise current date)
+    if (article.publishedDate) {
+      const publishedDateStr = article.publishedDate.getFullYear() + '-' + 
+                               String(article.publishedDate.getMonth() + 1).padStart(2, '0') + '-' + 
+                               String(article.publishedDate.getDate()).padStart(2, '0');
+      markdown += `date: ${publishedDateStr}\n`;
+    } else {
+      const currentDateStr = now.getFullYear() + '-' + 
+                            String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+                            String(now.getDate()).padStart(2, '0');
+      markdown += `date: ${currentDateStr}\n`;
+    }
+    
+    markdown += `url: ${article.url}\n`;
+    markdown += `created: ${createdDateTime}\n`;
+    markdown += `updated: ${createdDateTime}\n`;
+    
+    // Add tags from profile (single line format)
     if (summary.profile.tags && summary.profile.tags.length > 0) {
-      markdown += 'tags:\n';
-      summary.profile.tags.forEach(tag => {
-        markdown += `  - ${tag}\n`;
-      });
+      markdown += `tags: ${summary.profile.tags.join(', ')}\n`;
     }
     
     markdown += '---\n\n';

@@ -46,8 +46,12 @@ export class ObsidianIntegration {
     const domain = urlParts.hostname.replace(/^www\./, '');
     const cleanDomain = domain.replace(/[^a-zA-Z0-9-]/g, '-');
     
+    // Clean title for filename use
+    const cleanTitle = (article.title || 'Article').replace(/[^a-zA-Z0-9가-힣\s-]/g, '').trim();
+    
     const filename = filenameTemplate
       .replace('{date}', currentDate)
+      .replace('{title}', cleanTitle)
       .replace('{published_date}', publishedDateStr)
       .replace('{published_year}', publishedDate.getFullYear().toString())
       .replace('{published_month}', String(publishedDate.getMonth() + 1).padStart(2, '0'))
@@ -88,7 +92,11 @@ export class ObsidianIntegration {
     const domain = urlParts.hostname.replace(/^www\./, '');
     const cleanDomain = domain.replace(/[^a-zA-Z0-9-]/g, '-');
     
+    // Clean title for filename use
+    const cleanTitle = (article.title || 'Article').replace(/[^a-zA-Z0-9가-힣\s-]/g, '').trim();
+    
     title = title.replace('{date}', currentDateStr);
+    title = title.replace('{title}', cleanTitle);
     title = title.replace('{domain}', cleanDomain);
     title = title.replace('{timestamp}', Date.now().toString());
     

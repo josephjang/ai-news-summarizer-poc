@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:feedburner="http://rssnamespace.org/feedburner/ext/1.0" version="2.0">
+  <channel>
+    <title>Test RSS Feed</title>
+    <link>https://example.com</link>
+    <description>Mock RSS feed for testing</description>
+    <language>en-us</language>
+    <pubDate>Sun, 27 Jul 2025 10:00:00 GMT</pubDate>
+    <lastBuildDate>Sun, 27 Jul 2025 10:00:00 GMT</lastBuildDate>
+    
+    <item>
+      <title>First Test Article</title>
+      <link>https://example.com/article-1</link>
+      <description>This is the first test article for our RSS feed testing.</description>
+      <pubDate>Sun, 27 Jul 2025 10:00:00 GMT</pubDate>
+      <guid>https://example.com/article-1</guid>
+      <category>Technology</category>
+      <dc:creator>Test Author</dc:creator>
+    </item>
+    
+    <item>
+      <title>Second Test Article</title>
+      <link>https://example.com/article-2</link>
+      <description>This is the second test article with different metadata.</description>
+      <pubDate>Sun, 27 Jul 2025 09:00:00 GMT</pubDate>
+      <guid>https://example.com/article-2</guid>
+      <category>AI</category>
+      <dc:creator>Another Author</dc:creator>
+    </item>
+    
+    <item>
+      <title>Third Test Article</title>
+      <link>https://example.com/article-3</link>
+      <description>This is the third test article for testing pagination limits.</description>
+      <pubDate>Sun, 27 Jul 2025 08:00:00 GMT</pubDate>
+      <guid>https://example.com/article-3</guid>
+      <category>Testing</category>
+    </item>
+    
+  </channel>
+</rss>

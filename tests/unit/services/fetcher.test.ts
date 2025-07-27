@@ -86,7 +86,12 @@ describe('ContentFetcher - Mozilla Readability Integration', () => {
         parse: jest.fn().mockReturnValue({
           title: 'Sample Article Title',
           content: '<h1>Sample Article Title</h1><p>This is the first paragraph of the test article.</p><p>This is the second paragraph with more content.</p>',
-          textContent: 'Sample Article Title This is the first paragraph of the test article. This is the second paragraph with more content.'
+          textContent: 'Sample Article Title This is the first paragraph of the test article. This is the second paragraph with more content.',
+          publishedTime: '2025-01-01T12:00:00.000Z',
+          byline: 'Test Author',
+          siteName: 'Test Site',
+          lang: 'en',
+          excerpt: 'This is a test excerpt of the article.'
         })
       };
 
@@ -118,8 +123,15 @@ describe('ContentFetcher - Mozilla Readability Integration', () => {
         url: mockUrl,
         title: 'Sample Article Title',
         markdownContent: expect.stringContaining('Sample Article Title'),
-        publishedDate: expect.any(Date)
+        publishedDate: expect.any(Date),
+        author: 'Test Author',
+        siteName: 'Test Site',
+        language: 'en',
+        excerpt: 'This is a test excerpt of the article.'
       });
+
+      // Verify Readability publishedTime is used over manual parsing
+      expect(result.publishedDate?.toISOString()).toBe('2025-01-01T12:00:00.000Z');
 
       // Should contain actual article content, not navigation/sidebar
       expect(result.markdownContent).toContain('first paragraph');
@@ -171,6 +183,71 @@ describe('ContentFetcher - Mozilla Readability Integration', () => {
 
       expect(result.title).toBe('Untitled');
       expect(result.markdownContent).toContain('Content without title');
+    });
+
+    it('should prioritize Readability publishedTime over manual parsing', async () => {
+      // Mock page data with manual meta tags
+      mockPage.evaluate.mockResolvedValue({
+        fullHTML: '<html><head><meta property="article:published_time" content="2020-01-01T00:00:00.000Z"></head><body><article><h1>Test</h1></article></body></html>',
+        metaData: {
+          'article:published_time': '2020-01-01T00:00:00.000Z' // Old date
+        },
+        url: mockUrl
+      });
+
+      const mockDocument = {};
+      const mockWindow = { document: mockDocument };
+      (JSDOM as jest.MockedClass<typeof JSDOM>).mockImplementation(() => ({
+        window: mockWindow
+      } as any));
+
+      // Readability returns newer date
+      const mockReadabilityInstance = {
+        parse: jest.fn().mockReturnValue({
+          title: 'Test Article',
+          content: '<p>Content</p>',
+          textContent: 'Content',
+          publishedTime: '2025-01-01T12:00:00.000Z' // Newer date from Readability
+        })
+      };
+      (Readability as jest.MockedClass<typeof Readability>).mockImplementation(() => mockReadabilityInstance as any);
+
+      const result = await fetcher.fetchArticle(mockUrl);
+
+      // Should use Readability date, not manual parsing
+      expect(result.publishedDate?.toISOString()).toBe('2025-01-01T12:00:00.000Z');
+    });
+
+    it('should fallback to manual parsing when Readability publishedTime is invalid', async () => {
+      mockPage.evaluate.mockResolvedValue({
+        fullHTML: '<html><head><meta property="article:published_time" content="2025-01-01T12:00:00.000Z"></head><body><article><h1>Test</h1></article></body></html>',
+        metaData: {
+          'article:published_time': '2025-01-01T12:00:00.000Z'
+        },
+        url: mockUrl
+      });
+
+      const mockDocument = {};
+      const mockWindow = { document: mockDocument };
+      (JSDOM as jest.MockedClass<typeof JSDOM>).mockImplementation(() => ({
+        window: mockWindow
+      } as any));
+
+      // Readability returns invalid date
+      const mockReadabilityInstance = {
+        parse: jest.fn().mockReturnValue({
+          title: 'Test Article',
+          content: '<p>Content</p>',
+          textContent: 'Content',
+          publishedTime: 'invalid-date-string'
+        })
+      };
+      (Readability as jest.MockedClass<typeof Readability>).mockImplementation(() => mockReadabilityInstance as any);
+
+      const result = await fetcher.fetchArticle(mockUrl);
+
+      // Should fallback to manual parsing
+      expect(result.publishedDate?.toISOString()).toBe('2025-01-01T12:00:00.000Z');
     });
   });
 

@@ -9,6 +9,11 @@ export interface ArticleContent {
   title?: string;
   publishedDate?: Date;
   metaData?: Record<string, string>;
+  // Additional Readability metadata
+  author?: string;
+  siteName?: string;
+  language?: string;
+  excerpt?: string;
 }
 
 export class ContentFetcher {
@@ -144,14 +149,30 @@ export class ContentFetcher {
         throw new Error('Failed to extract article content using Readability');
       }
 
-      // Parse published date from meta data
-      const publishedDate = this.parsePublishedDate(pageData.metaData);
+      // Compare Readability metadata vs manual parsing
+      const readabilityPublishedDate = article.publishedTime ? new Date(article.publishedTime) : undefined;
+      const manualPublishedDate = this.parsePublishedDate(pageData.metaData);
       
-      // Debug: Log what we extracted
+      // Use Readability date if available, fallback to manual parsing
+      const publishedDate = readabilityPublishedDate && !isNaN(readabilityPublishedDate.getTime()) 
+        ? readabilityPublishedDate 
+        : manualPublishedDate;
+      
+      // Debug: Log what we extracted and compare approaches
       console.log(`\n=== DEBUG INFO ===`);
       console.log(`Content length: ${article.content?.length || 0}`);
-      console.log(`Title: ${article.title}`);
-      console.log(`Published date: ${publishedDate ? publishedDate.toISOString() : 'Not found'}`);
+      console.log(`Title comparison:`);
+      console.log(`  - Readability: "${article.title}"`);
+      console.log(`  - Manual: "${pageData.metaData['og:title'] || pageData.metaData['twitter:title'] || 'Not found'}"`);
+      console.log(`Published date comparison:`);
+      console.log(`  - Readability: ${readabilityPublishedDate && !isNaN(readabilityPublishedDate.getTime()) ? readabilityPublishedDate.toISOString() : 'Not found'}`);
+      console.log(`  - Manual: ${manualPublishedDate ? manualPublishedDate.toISOString() : 'Not found'}`);
+      console.log(`  - Final: ${publishedDate ? publishedDate.toISOString() : 'Not found'}`);
+      console.log(`Additional Readability metadata:`);
+      console.log(`  - Author: ${article.byline || 'Not found'}`);
+      console.log(`  - Site name: ${article.siteName || 'Not found'}`);
+      console.log(`  - Language: ${article.lang || 'Not found'}`);
+      console.log(`  - Excerpt: ${article.excerpt?.substring(0, 100) || 'Not found'}...`);
       console.log(`Content preview: ${article.textContent?.substring(0, 200)}...`);
       console.log(`==================\n`);
       
@@ -162,7 +183,12 @@ export class ContentFetcher {
         markdownContent: this.cleanMarkdownContent(markdownContent),
         title: article.title || 'Untitled',
         publishedDate,
-        metaData: pageData.metaData
+        metaData: pageData.metaData,
+        // Additional Readability metadata
+        author: article.byline || undefined,
+        siteName: article.siteName || undefined,
+        language: article.lang || undefined,
+        excerpt: article.excerpt || undefined
       };
 
     } finally {

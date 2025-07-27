@@ -46,6 +46,10 @@ export class ObsidianIntegration {
     const domain = urlParts.hostname.replace(/^www\./, '');
     const cleanDomain = domain.replace(/[^a-zA-Z0-9-]/g, '-');
     
+    // Use siteName if available, fallback to domain
+    const siteIdentifier = article.siteName || domain;
+    const cleanSiteIdentifier = siteIdentifier.replace(/[^a-zA-Z0-9가-힣\s-]/g, '').trim();
+    
     // Clean title for filename use
     const cleanTitle = (article.title || 'Article').replace(/[^a-zA-Z0-9가-힣\s-]/g, '').trim();
     
@@ -57,7 +61,11 @@ export class ObsidianIntegration {
       .replace('{published_month}', String(publishedDate.getMonth() + 1).padStart(2, '0'))
       .replace('{published_day}', String(publishedDate.getDate()).padStart(2, '0'))
       .replace('{domain}', cleanDomain)
-      .replace('{timestamp}', Date.now().toString());
+      .replace('{siteName}', cleanSiteIdentifier)
+      .replace('{timestamp}', Date.now().toString())
+      // New Readability metadata placeholders
+      .replace('{author}', (article.author || 'Unknown').replace(/[^a-zA-Z0-9가-힣\s-]/g, '').trim())
+      .replace('{language}', article.language || 'unknown');
     
     return `${filename}.md`;
   }
@@ -92,13 +100,20 @@ export class ObsidianIntegration {
     const domain = urlParts.hostname.replace(/^www\./, '');
     const cleanDomain = domain.replace(/[^a-zA-Z0-9-]/g, '-');
     
+    // Use siteName if available, fallback to domain
+    const siteIdentifier = article.siteName || domain;
+    
     // Clean title for filename use
     const cleanTitle = (article.title || 'Article').replace(/[^a-zA-Z0-9가-힣\s-]/g, '').trim();
     
     title = title.replace('{date}', currentDateStr);
     title = title.replace('{title}', cleanTitle);
     title = title.replace('{domain}', cleanDomain);
-    title = title.replace('{timestamp}', Date.now().toString());
+    title = title.replace('{siteName}', siteIdentifier);
+    title = title.replace('{timestamp}', Date.now().toString())
+           // New Readability metadata placeholders for title
+           .replace('{author}', article.author || 'Unknown')
+           .replace('{language}', article.language || 'unknown');
     
     let markdown = '';
     

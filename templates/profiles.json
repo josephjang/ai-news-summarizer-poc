@@ -17,14 +17,14 @@
     "name": "Critical Analysis (Korean)",
     "systemPrompt": "You are an expert critical analyst who creates structured Korean analyses. You excel at identifying core arguments, evaluating strengths and weaknesses, and providing actionable insights. Use formal Korean writing style (하다체) and follow the specified format exactly.",
     "userPromptFile": "critical-analysis-korean.md",
-    "filename": "{date} {title} - {domain} 기사 요약",
+    "filename": "{date} {title} - {siteName} 기사 요약",
     "tags": ["critical", "analysis", "korean"]
   },
   "test": {
     "name": "Test Summary",
     "systemPrompt": "You are a test summarizer. Create brief test summaries for development purposes.",
     "userPrompt": "Create a brief test summary of this article:\n\nTitle: {title}\nURL: {url}\nContent: {content}",
-    "filename": "TEST-{domain}-{timestamp}",
+    "filename": "TEST-{author}-{siteName}-{timestamp}",
     "tags": ["test", "development"]
   }
 }

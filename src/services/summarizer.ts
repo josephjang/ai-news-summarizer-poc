@@ -5,6 +5,7 @@ export interface SummaryResult {
   summary: string;
   originalArticle: ArticleContent;
   profile: SummaryProfile;
+  metadata?: Record<string, any>;
 }
 
 export interface SummaryProfile {

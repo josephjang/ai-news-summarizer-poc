@@ -32,8 +32,10 @@
     "@types/turndown": "^5.0.5",
     "commander": "^14.0.0",
     "dotenv": "^17.0.0",
+    "node-cron": "^4.2.1",
     "openai": "^5.8.2",
     "puppeteer": "^24.11.2",
+    "rss-parser": "^3.13.0",
     "ts-node": "^10.9.2",
     "turndown": "^7.2.0",
     "typescript": "^5.8.3"

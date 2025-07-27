@@ -2,6 +2,7 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import { ObsidianConfig } from '../services/obsidian';
 import { SummaryProfile } from '../services/summarizer';
+import { TriggerConfig } from '../services/triggers';
 
 export interface AppConfig {
   ai: {
@@ -13,6 +14,7 @@ export interface AppConfig {
   obsidian: ObsidianConfig;
   prompts: Record<string, SummaryProfile>;
   defaultPrompt: string;
+  triggers?: TriggerConfig[];
 }
 
 export class ConfigManager {
@@ -64,7 +66,8 @@ export class ConfigManager {
         filenameFormat: '{date}-{domain}'
       },
       prompts: {},
-      defaultPrompt: 'default'
+      defaultPrompt: 'default',
+      triggers: []
     };
 
     // Save the default config

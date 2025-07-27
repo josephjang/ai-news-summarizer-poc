@@ -40,5 +40,12 @@
     "userPromptFile": "ainews-korean.md",
     "filename": "AINews {published_date}",
     "tags": ["AINews"]
+  },
+  "test": {
+    "name": "Test Summary",
+    "systemPrompt": "You are a test summarizer. Create brief test summaries for development purposes.",
+    "userPrompt": "Create a brief test summary of this article:\n\nTitle: {title}\nURL: {url}\nContent: {content}",
+    "filename": "TEST-{domain}-{timestamp}",
+    "tags": ["test", "development"]
   }
 }

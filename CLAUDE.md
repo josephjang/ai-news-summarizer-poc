@@ -5,7 +5,9 @@
 - Use `google/gemini-2.5-pro` model when using gemini model
 
 ## Git Workflow
-- Separate commits by logical changes
+- Separate commits by logical changes - each commit should have a single logical purpose
+- Never combine unrelated changes (e.g., bug fixes + new features) in one commit
+- Use `git reset --soft HEAD~1` to split commits that accidentally combined multiple changes
 - Avoid using git aliases to ensure clarity and consistency across different environments
 - Use git binary (`/usr/bin/git`) to avoid git alias conflicts
 - Write descriptive commit messages that explain the "why" not just the "what"
@@ -51,3 +53,17 @@
 - Configure separate test and production vault paths
 - Use profile-specific filename patterns with timestamps for uniqueness
 - Enable/disable triggers via `enabled` flag in configuration
+
+## Frontmatter and File Naming
+- Use new frontmatter format: `title`, `type`, `date`, `url`, `created`, `updated`, `tags`
+- Support placeholder variables in filenames: `{date}`, `{title}`, `{published_date}`, `{domain}`, `{timestamp}`
+- Ensure both `generateFilename()` and `generateMarkdown()` methods handle all placeholders
+- Clean titles for safe filename use while preserving Korean characters
+- Use comma-separated tags format instead of YAML lists for better readability
+
+## Profile Management
+- Keep profiles minimal and focused on actual use cases
+- Separate complex prompts into external files in `templates/prompts/`
+- Design filename patterns to match prompt-generated content structure
+- Use descriptive profile names that reflect their analytical approach
+- Consider chronological sorting when designing filename patterns (date-first format)
